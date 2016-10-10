@@ -17,6 +17,7 @@ focisheet = gc.open_by_url('https://docs.google.com/spreadsheets/d/1037uq5DzMHd1
 
 bent = focisheet.get_worksheet(0)
 kint = focisheet.get_worksheet(1)
+katlan = focisheet.get_worksheet(2)
 
 lcd.create_char(1, [31, 21, 10, 4, 4, 10, 17, 31])
 lcd.create_char(2, [31, 17, 14, 4, 4, 10, 17, 31])
@@ -43,14 +44,18 @@ def getWSNamefromId(wsNum):
         return meccsek_bent[0][0]
     elif wsNum == 2:
         return meccsek_kint[0][0]
+    elif wsNum == 3:
+        return meccsek_katlan[0][0]
     else:
         return 'Error'
 
 def maxWs(wsNum):
     if wsNum == 1:
         return bent_max
-    else:
+    elif wsNum == 2:
         return kint_max
+    else:
+        return katlan_max
 
 def gNameShortener(gName):
     sGrName = ''
@@ -59,7 +64,7 @@ def gNameShortener(gName):
 
     else:
         sGrName += gName[:3]
-        sGrName += '~'
+        sGrName += '.'
         i = len(gName)-3
         j = len(gName)
         sGrName += gName[i:j]
@@ -74,14 +79,15 @@ def scrollName(gName, i):
 
 #print eredmenyek.acell('A1').value
 
-#Cellak szamozasa a listaban 0rol indul, Row, Coloumn formatumban
-#Cella szamozasa drivebol 1-rol indul Row, Coloumn formatumban
+#Cellak szamozasa a listaban 0rol indul, Row, Column formatumban
+#Cella szamozasa drivebol 1-rol indul Row, Column formatumban
 
 #print meccsek[2][1]
 #bent.update_cell(3, 4, '2:3')
 
 meccsek_bent = bent.get_all_values()
 meccsek_kint = kint.get_all_values()
+meccsek_katlan = katlan.get_all_values()
 
 print 'asd' + meccsek_bent[10][1] + 'asd'
 
@@ -91,6 +97,7 @@ bent_max = len(meccsek_bent)
 
 print 'kint'
 kint_max = len(meccsek_kint)
+katlan_max = len(meccsek_katlan)
 
 last_update = time.time()
 
@@ -109,6 +116,7 @@ while True:
         lcd.message("Adatbazis\nfrissitese")
         meccsek_bent = bent.get_all_values()
         meccsek_kint = kint.get_all_values()
+        meccsek_katlan = katlan.get_all_values()
 
         print 'meccsek bent'
 
@@ -116,11 +124,12 @@ while True:
 
         print 'kint'
         kint_max = len(meccsek_kint)
+        katlan_max = len(meccsek_katlan)
 
         last_update = time.time()
 
     if lcd.is_pressed(LCD.RIGHT):
-        if ws_num < 2:
+        if ws_num < 3:
             ws_num += 1
         else:
             ws_num = 1
@@ -131,15 +140,15 @@ while True:
         if ws_num > 1:
             ws_num -= 1
         else:
-            ws_num = 2
+            ws_num = 3
         print str(ws_num)
 
         ws_change = True
     elif lcd.is_pressed(LCD.DOWN):
         if game_num < maxWs(ws_num):
-            ++game_num
+            game_num += 1
         else:
-            game_num = 1
+            game_num = maxWs(ws_num)
 
         gameNum_change = True
 
@@ -147,7 +156,7 @@ while True:
         if game_num > 1:
             game_num -= 1
         else:
-            game_num = maxWs(ws_num)
+            game_num = 1
 
         gameNum_change = True
 
@@ -157,7 +166,7 @@ while True:
         lcd.message('\x05')
         lcd.message(gNameShortener(csapat2))
 
-        time.sleep(0.15)
+        time.sleep(0.3)
 
         g1Point = 0
         g2Point = 0
@@ -176,29 +185,22 @@ while True:
             elif lcd.is_pressed(LCD.UP):
                 if group == 1:
                     g1Point += 1
-                    lcd.message('    ')
-                    lcd.set_cursor(1,1)
-                    lcd.message(str(g1Point))
-                    lcd.set_cursor(1,1)
                 else:
                     g2Point += 1
-                    lcd.message('    ')
-                    lcd.set_cursor(14,1)
-                    lcd.message(str(g2Point))
-                    lcd.set_cursor(14,1)
             elif lcd.is_pressed(LCD.DOWN):
                 if group == 1:
                     g1Point -= 1
-                    lcd.message('    ')
-                    lcd.set_cursor(1,1)
-                    lcd.message(str(g1Point))
-                    lcd.set_cursor(1,1)
                 else:
                     g2Point -= 1
-                    lcd.message('    ')
-                    lcd.set_cursor(14,1)
-                    lcd.message(str(g2Point))
-                    lcd.set_cursor(14,1)
+            lcd.set_cursor(1,1)
+            lcd.message('                ')
+            lcd.set_cursor(1,1)
+            lcd.message(str(g1Point) + '       ' + str(g2Point))
+
+            time.sleep(0.15)
+
+
+        time.sleep(0.15)
 
         lcd.blink(False)
 
@@ -207,9 +209,9 @@ while True:
 
 
         if ws_num == 1:
-            bent.update_cell(4, game_num, str(g1Point) + ':' + str(g2Point))
+            bent.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
         else:
-            kint.update_cell(4, game_num, str(g1Point) + ':' + str(g2Point))
+            kint.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
 
         game_num = 1
         gameNum_change = True
@@ -229,13 +231,16 @@ while True:
         ws_change = False
 
     if gameNum_change:
-        if game_num == 1:
-            csapat1 = meccsek_bent[game_num-1][1]
-            csapat2 = meccsek_bent[game_num-1][2]
+        if ws_num == 1:
+            csapat1 = meccsek_bent[game_num+1][1]
+            csapat2 = meccsek_bent[game_num+1][2]
 
+        elif ws_num == 2:
+            csapat1 = meccsek_kint[game_num+1][1]
+            csapat2 = meccsek_kint[game_num+1][2]
         else:
-            csapat1 = meccsek_kint[game_num-1][1]
-            csapat2 = meccsek_kint[game_num-1][2]
+            csapat1 = meccsek_katlan[game_num+1][1]
+            csapat2 = meccsek_katlan[game_num+1][2]
 
         lcd.set_cursor(0, 1)
         lcd.message('                ')
