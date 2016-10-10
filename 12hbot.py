@@ -161,57 +161,71 @@ while True:
         gameNum_change = True
 
     elif lcd.is_pressed(LCD.SELECT):
-        lcd.clear()
-        lcd.message(gNameShortener(csapat1))
-        lcd.message('\x05')
-        lcd.message(gNameShortener(csapat2))
+    	if csapat1 == '-':
+    		lcd.clear()
+    		lcd.message("Ez nem egy meccs")
+    	else:
+	        lcd.clear()
+	        lcd.message(gNameShortener(csapat1))
+	        lcd.message('\x05')
+	        lcd.message(gNameShortener(csapat2))
 
-        time.sleep(0.3)
+	        time.sleep(0.3)
 
-        g1Point = 0
-        g2Point = 0
+	        g1Point = 0
+	        g2Point = 0
 
-        lcd.set_cursor(1,1)
-        lcd.blink(True)
-        group = 1
+	        lcd.set_cursor(1,1)
+	        lcd.blink(True)
+	        group = 1
+	        groupChange = True
 
-        while not lcd.is_pressed(LCD.SELECT):
-            if lcd.is_pressed(LCD.RIGHT):
-                lcd.set_cursor(14,1)
-                group = 1
-            elif lcd.is_pressed(LCD.LEFT):
-                lcd.set_cursor(1,1)
-                group = 2
-            elif lcd.is_pressed(LCD.UP):
-                if group == 1:
-                    g1Point += 1
-                else:
-                    g2Point += 1
-            elif lcd.is_pressed(LCD.DOWN):
-                if group == 1:
-                    g1Point -= 1
-                else:
-                    g2Point -= 1
-            lcd.set_cursor(1,1)
-            lcd.message('                ')
-            lcd.set_cursor(1,1)
-            lcd.message(str(g1Point) + '       ' + str(g2Point))
+	        while not lcd.is_pressed(LCD.SELECT):
+	            if lcd.is_pressed(LCD.RIGHT):
+	                lcd.set_cursor(14,1)
+	                group = 2
 
-            time.sleep(0.15)
+	                groupChange = True
+	            elif lcd.is_pressed(LCD.LEFT):
+	                lcd.set_cursor(1,1)
+	                group = 1
+
+	                groupChange = True
+	            elif lcd.is_pressed(LCD.UP):
+	                if group == 1:
+	                    g1Point += 1
+	                else:
+	                    g2Point += 1
+
+	                groupChange = True
+	            elif lcd.is_pressed(LCD.DOWN):
+	                if group == 1:
+	                    g1Point -= 1
+	                else:
+	                    g2Point -= 1
+
+	                groupChange = True
+
+	            if groupChange:
+		            lcd.set_cursor(1,1)
+	    	        lcd.message('                ')
+	        	    lcd.set_cursor(1,1)
+	            	lcd.message(str(g1Point) + '       ' + str(g2Point))
+
+	            time.sleep(0.15)
+
+	        lcd.blink(False)
+
+	        lcd.clear()
+	        lcd.message('Adatok \nfeltoltese')
 
 
-        time.sleep(0.15)
-
-        lcd.blink(False)
-
-        lcd.clear()
-        lcd.message('Adatok \nfeltoltese')
-
-
-        if ws_num == 1:
-            bent.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
-        else:
-            kint.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+	        if ws_num == 1:
+	            bent.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+	        elif ws_num == 2:
+	            kint.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+	        else:
+	        	katlan.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
 
         game_num = 1
         gameNum_change = True
@@ -235,12 +249,21 @@ while True:
             csapat1 = meccsek_bent[game_num+1][1]
             csapat2 = meccsek_bent[game_num+1][2]
 
+            idopont = meccsek_bent[game_num+1][4]
+
         elif ws_num == 2:
             csapat1 = meccsek_kint[game_num+1][1]
             csapat2 = meccsek_kint[game_num+1][2]
+
+            idopont = meccsek_bent[game_num+1][4]
         else:
             csapat1 = meccsek_katlan[game_num+1][1]
             csapat2 = meccsek_katlan[game_num+1][2]
+
+            idopont = meccsek_bent[game_num+1][4]
+
+        lcd.set_cursor(12, 0)
+        lcd.message(idopont)
 
         lcd.set_cursor(0, 1)
         lcd.message('                ')
