@@ -112,21 +112,32 @@ lcd.message('asd')
 while True:
     #10percenkent adatbazis frissitese
     if (time.time()-last_update) >= 600:
-        lcd.clear()
-        lcd.message("Adatbazis\nfrissitese")
-        meccsek_bent = bent.get_all_values()
-        meccsek_kint = kint.get_all_values()
-        meccsek_katlan = katlan.get_all_values()
+        try:
+            lcd.clear()
+            lcd.message("Adatbazis\nfrissitese")
+            meccsek_bent = bent.get_all_values()
+            meccsek_kint = kint.get_all_values()
+            meccsek_katlan = katlan.get_all_values()
 
-        print 'meccsek bent'
+            print 'meccsek bent'
 
-        bent_max = len(meccsek_bent)
+            bent_max = len(meccsek_bent)
 
-        print 'kint'
-        kint_max = len(meccsek_kint)
-        katlan_max = len(meccsek_katlan)
+            print 'kint'
+            kint_max = len(meccsek_kint)
+            katlan_max = len(meccsek_katlan)
+
+        except:
+            lcd.clear()
+            lcd.message('Network error\ntry again later')
 
         last_update = time.time()
+
+        game_num = 1
+        gameNum_change = True
+
+        ws_num = 1
+        ws_change = True
 
     if lcd.is_pressed(LCD.RIGHT):
         if ws_num < 3:
@@ -164,6 +175,8 @@ while True:
     	if csapat1 == '-':
     		lcd.clear()
     		lcd.message("Ez nem egy meccs")
+
+            time.sleep(2)
     	else:
 	        lcd.clear()
 	        lcd.message(gNameShortener(csapat1))
@@ -181,16 +194,13 @@ while True:
 	        groupChange = True
 
 	        while not lcd.is_pressed(LCD.SELECT):
+                lcd.set_cursor(1,1)
 	            if lcd.is_pressed(LCD.RIGHT):
 	                lcd.set_cursor(14,1)
 	                group = 2
-
-	                groupChange = True
 	            elif lcd.is_pressed(LCD.LEFT):
 	                lcd.set_cursor(1,1)
 	                group = 1
-
-	                groupChange = True
 	            elif lcd.is_pressed(LCD.UP):
 	                if group == 1:
 	                    g1Point += 1
@@ -212,6 +222,13 @@ while True:
 	        	    lcd.set_cursor(1,1)
 	            	lcd.message(str(g1Point) + '       ' + str(g2Point))
 
+                    if group == 1:
+                        lcd.set_cursor(1,1)
+                    else:
+                        lcd.set_cursor(9,1)
+
+                    groupChange = False
+
 	            time.sleep(0.15)
 
 	        lcd.blink(False)
@@ -219,19 +236,24 @@ while True:
 	        lcd.clear()
 	        lcd.message('Adatok \nfeltoltese')
 
-
-	        if ws_num == 1:
-	            bent.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
-	        elif ws_num == 2:
-	            kint.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
-	        else:
-	        	katlan.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+            try:
+    	        if ws_num == 1:
+    	            bent.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+    	        elif ws_num == 2:
+    	            kint.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+    	        else:
+    	        	katlan.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+            except:
+                lcd.clear()
+                lcd.message('Network error\ntry again later')
 
         game_num = 1
         gameNum_change = True
 
         ws_num = 1
         ws_change = True
+
+        time.sleep(0.2)
 
     if ws_change:
         game_num = 1
@@ -262,7 +284,7 @@ while True:
 
             idopont = meccsek_bent[game_num+1][4]
 
-        lcd.set_cursor(12, 0)
+        lcd.set_cursor(11, 0)
         lcd.message(idopont)
 
         lcd.set_cursor(0, 1)
