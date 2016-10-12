@@ -172,55 +172,63 @@ while True:
         gameNum_change = True
 
     elif lcd.is_pressed(LCD.SELECT):
-    	if csapat1 == '-':
-    		lcd.clear()
-    		lcd.message("Ez nem egy meccs")
+        if csapat1 == '-':
+            lcd.clear()
+            lcd.message("Ez nem egy meccs")
 
             time.sleep(2)
-    	else:
-	        lcd.clear()
-	        lcd.message(gNameShortener(csapat1))
-	        lcd.message('\x05')
-	        lcd.message(gNameShortener(csapat2))
+        else:
+            lcd.clear()
+            lcd.message(gNameShortener(csapat1))
+            lcd.message('\x05')
+            lcd.message(gNameShortener(csapat2))
 
-	        time.sleep(0.3)
+            time.sleep(0.3)
 
-	        g1Point = 0
-	        g2Point = 0
+            g1Point = 0
+            g2Point = 0
 
-	        lcd.set_cursor(1,1)
-	        lcd.blink(True)
-	        group = 1
-	        groupChange = True
+            lcd.set_cursor(1,1)
+            lcd.blink(True)
+            group = 1
+            groupChange = True
 
-	        while not lcd.is_pressed(LCD.SELECT):
+            while not lcd.is_pressed(LCD.SELECT):
                 lcd.set_cursor(1,1)
-	            if lcd.is_pressed(LCD.RIGHT):
-	                lcd.set_cursor(14,1)
-	                group = 2
-	            elif lcd.is_pressed(LCD.LEFT):
-	                lcd.set_cursor(1,1)
-	                group = 1
-	            elif lcd.is_pressed(LCD.UP):
-	                if group == 1:
-	                    g1Point += 1
-	                else:
-	                    g2Point += 1
+                if lcd.is_pressed(LCD.RIGHT):
+                    lcd.set_cursor(14,1)
+                    group = 2
+                elif lcd.is_pressed(LCD.LEFT):
+                    lcd.set_cursor(1,1)
+                    group = 1
+                elif lcd.is_pressed(LCD.UP):
+                    if group == 1:
+                        g1Point += 1
+                    else:
+                        g2Point += 1
 
-	                groupChange = True
-	            elif lcd.is_pressed(LCD.DOWN):
-	                if group == 1:
-	                    g1Point -= 1
-	                else:
-	                    g2Point -= 1
+                    groupChange = True
+                elif lcd.is_pressed(LCD.DOWN):
+                    if group == 1:
+                        if g1Point != 0:
+                            g1Point -= 1
+                        else:
+                            g1Point = 0
+                    else:
+                        if g2Point != 0:
+                            g2Point -= 1
+                        else:
+                            g2Point = 0
 
-	                groupChange = True
+                    groupChange = True
+                else:
+                    groupChange = False
 
-	            if groupChange:
-		            lcd.set_cursor(1,1)
-	    	        lcd.message('                ')
-	        	    lcd.set_cursor(1,1)
-	            	lcd.message(str(g1Point) + '       ' + str(g2Point))
+                if groupChange:
+                    lcd.set_cursor(1,1)
+                    lcd.message('                ')
+                    lcd.set_cursor(1,1)
+                    lcd.message(str(g1Point) + '       ' + str(g2Point))
 
                     if group == 1:
                         lcd.set_cursor(1,1)
@@ -229,20 +237,20 @@ while True:
 
                     groupChange = False
 
-	            time.sleep(0.15)
+                time.sleep(0.15)
 
-	        lcd.blink(False)
+            lcd.blink(False)
 
-	        lcd.clear()
-	        lcd.message('Adatok \nfeltoltese')
+            lcd.clear()
+            lcd.message('Adatok \nfeltoltese')
 
             try:
-    	        if ws_num == 1:
-    	            bent.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
-    	        elif ws_num == 2:
-    	            kint.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
-    	        else:
-    	        	katlan.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+                if ws_num == 1:
+                    bent.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+                elif ws_num == 2:
+                    kint.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
+                else:
+                    katlan.update_cell(game_num + 2, 4, str(g1Point) + ':' + str(g2Point))
             except:
                 lcd.clear()
                 lcd.message('Network error\ntry again later')
